@@ -18,8 +18,8 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("🚨 エラー: .env ファイルに SUPABASE_URL または SUPABASE_SERVICE_ROLE_KEY が設定されていません。")
 
-# InsightFaceモデル設定
-FACE_APP = FaceAnalysis(name='buffalo_l', providers=['CPUExecutionProvider'])
+# InsightFaceモデル設定 (Render側と合わせてメモリ軽量なbuffalo_sを使用)
+FACE_APP = FaceAnalysis(name='buffalo_s', providers=['CPUExecutionProvider'])
 FACE_APP.prepare(ctx_id=0, det_size=(640, 640))
 
 # Supabaseクライアント初期化
