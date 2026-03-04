@@ -1,10 +1,11 @@
 import os
-# Limit threads to reduce memory usage on Render free tier
+# Limit threads and memory fragmentation to reduce memory usage on Render free tier
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["MALLOC_ARENA_MAX"] = "2"
 
 import io
 import cv2
@@ -27,8 +28,10 @@ app.add_middleware(
 
 # InsightFaceモデルの初期化 (起動時に一度だけロード)
 # name='buffalo_s' は無料枠の512MB RAM制限を回避するための軽量モデルです
-face_app = FaceAnalysis(name='buffalo_s', providers=['CPUExecutionProvider'])
-face_app.prepare(ctx_id=0, det_size=(640, 640))
+# allowed_modules を指定することで、不要なモデル（性別年齢判定など）のロードを省きメモリを節約します
+face_app = FaceAnalysis(name='buffalo_s', allowed_modules=['detection', 'recognition'], providers=['CPUExecutionProvider'])
+# det_sizeを(320, 320)に下げることで推論時のメモリ消費量も抑えます
+face_app.prepare(ctx_id=0, det_size=(320, 320))
 
 @app.post("/extract_vector")
 async def extract_vector(image: UploadFile = File(...)):
